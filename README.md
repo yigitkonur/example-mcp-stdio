@@ -52,8 +52,8 @@ npm run vendor:sdk:update
 ## Quick Start
 
 ```bash
-git clone https://github.com/yigitkonur/example-mcp-server-stdio.git
-cd example-mcp-server-stdio
+git clone https://github.com/yigitkonur/example-mcp-stdio.git
+cd example-mcp-stdio
 npm ci
 npm run pipeline
 ```
