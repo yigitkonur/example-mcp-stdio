@@ -1,38 +1,67 @@
 # Validation and Workflow
 
-## Recommended local workflow
+## Local Quality Gate
 
-1. Generate new module with scaffold CLI.
-2. Implement real logic and schemas.
-3. Run full validation.
-4. Connect via your MCP host and test end-to-end.
-
-## Commands
+Use the full pipeline before opening a PR or pushing release-related changes:
 
 ```bash
-npm run build
-npm run smoke:stdio
 npm run pipeline
 ```
 
-## What smoke test checks
+Pipeline includes:
 
-`scripts/smoke-stdio.mjs` validates protocol basics by running the built server and executing:
+- clean build artifacts
+- type checking
+- lint checks
+- format checks
+- build
+- stdio smoke test
 
-- `initialize`
-- `notifications/initialized`
-- `tools/list`
+## mcp-cli Verification Flow
+
+After build, verify live behavior using `mcp-cli`.
+
+1. Connection + inventory
+
+```bash
+MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json info starter
+```
+
+2. Inspect tool schemas
+
+```bash
+MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json info starter echo
+MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json info starter sum_numbers
+```
+
+3. Happy-path calls
+
+```bash
+MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json call starter echo '{"text":"hello"}'
+MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json call starter sum_numbers '{"numbers":[1,2,3]}'
+```
+
+4. Invalid-input behavior
+
+```bash
+MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json call starter echo '{}'
+MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json call starter sum_numbers '{}'
+```
+
+## Non-Tool Primitive Verification
+
+For prompts/resources/completions, use protocol-level calls (or inspector/client integration tests) to validate:
+
 - `resources/list`
+- `resources/templates/list`
+- `resources/read`
 - `prompts/list`
+- `prompts/get`
+- `completion/complete`
 
-If any of these fail, smoke test exits non-zero.
+## Release Checklist
 
-## Updating vendored SDK snapshot
-
-Use this when you want to track upstream v2 changes:
-
-```bash
-npm run vendor:sdk:update
-npm install
-npm run pipeline
-```
+1. Run `npm run vendor:sdk:update` if SDK snapshot should be refreshed.
+2. Run `npm install` to sync lockfile.
+3. Run `npm run pipeline`.
+4. Verify docs (`README.md`, `docs/`, `CHANGELOG.md`) reflect the current behavior.

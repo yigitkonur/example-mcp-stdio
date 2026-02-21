@@ -4,9 +4,10 @@
 
 ### Documentation Rebuild For v2 Starter
 
-- Rewrote `README.md` from scratch with changelog-first layout.
-- Added a dedicated `docs/` set for v2 overview, scaffolder usage, and validation workflow.
-- Re-verified scaffold creator CLI behavior for tool/resource/prompt generation during doc update.
+- Reorganized all docs for professional structure and cross-link navigation.
+- Added `docs/README.md` as the documentation entrypoint.
+- Rewrote `README.md` with table of contents and clearer sections for scope, SDK context, CLI usage, and validation.
+- Standardized `docs/01`, `docs/02`, and `docs/03` formatting and content boundaries.
 
 ## 2.0.0 - 2026-02-21
 

@@ -1,27 +1,39 @@
 # MCP STDIO v2 Learning Starter
 
-## Changelog (Latest First)
+A production-ready, learning-focused starter for building **MCP servers over STDIO** with the **TypeScript SDK v2 primitives**.
+
+## Changelog Snapshot
 
 ### 2026-02-21: Major Rewrite For Upcoming TypeScript SDK v2
 
-- Full migration from v1-style implementation to MCP SDK v2 primitives.
-- New stdio-first starter architecture (tools/resources/prompts split by feature modules).
-- New built-in scaffold creator CLI (`serve`, `create tool`, `create resource`, `create prompt`).
-- New end-to-end stdio JSON-RPC smoke test.
-- New vendored SDK update workflow for reproducible pre-release installs.
+- Migrated from v1-style implementation to v2 primitives.
+- Rebuilt architecture as modular feature registrars (`tools`, `resources`, `prompts`).
+- Added built-in scaffold CLI (`serve`, `create tool|resource|prompt`).
+- Added protocol-level stdio smoke test and vendor refresh workflow.
 
-Full details: `CHANGELOG.md`
+Full history: [CHANGELOG.md](CHANGELOG.md)
 
-## What This Project Is
+## Table of Contents
 
-This repository is a **learning-first boilerplate** for building MCP servers with:
+- [Project Scope](#project-scope)
+- [SDK v2 Context](#sdk-v2-context)
+- [Quick Start](#quick-start)
+- [Scaffold Creator CLI](#scaffold-creator-cli)
+- [Validation and Testing](#validation-and-testing)
+- [Documentation](#documentation)
+- [Repository Layout](#repository-layout)
+- [License](#license)
 
-- **TypeScript SDK v2 primitives**
+## Project Scope
+
+This project is intentionally focused on:
+
 - **STDIO transport only**
-- **modular feature structure** that scales
-- **scaffold CLI** to generate starter modules quickly
+- **MCP v2-style server APIs** (`registerTool`, `registerResource`, `registerPrompt`)
+- **clear extensibility** via generated feature modules
+- **reproducible testing** with both smoke tests and `mcp-cli`
 
-## MCP SDK v2 Status (Important)
+## SDK v2 Context
 
 As of **February 21, 2026**, the official TypeScript SDK `main` branch is v2 pre-release (pre-alpha).
 
@@ -29,21 +41,15 @@ Official references:
 
 - SDK repository: <https://github.com/modelcontextprotocol/typescript-sdk>
 - Server guide: <https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/server.md>
-- FAQ (v2 notes, SSE removal): <https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/faq.md>
+- FAQ (v2 notes and transport guidance): <https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/faq.md>
 
-Practical implications:
+### Dependency Strategy in This Repo
 
-- v2 APIs may still evolve before stable release.
-- Server-side SSE transport is not part of v2 server package direction.
-- Node 20+, ESM, and Zod v4 are required for this starter.
-
-## Dependency Strategy Used Here
-
-Because v2 publishing/distribution is still in-progress, this project uses a vendored package tarball for reproducibility:
+Because v2 distribution is still evolving, this repository vendors a server package snapshot:
 
 - `vendor/modelcontextprotocol-server-2.0.0-alpha.0.tgz`
 
-Refresh vendor snapshot:
+Refresh it with:
 
 ```bash
 npm run vendor:sdk:update
@@ -58,7 +64,7 @@ npm ci
 npm run pipeline
 ```
 
-Run server:
+Run the server:
 
 ```bash
 npm run dev
@@ -68,73 +74,31 @@ npm run build && npm start
 
 ## Scaffold Creator CLI
 
-Main entrypoint: `src/index.ts`
+Entrypoint: `src/index.ts`
 
-### Commands
+### Command Summary
 
 ```bash
-# Start stdio MCP server
+# Start server
 node dist/index.js serve
 
-# Create a new tool module
+# Generate modules
 node dist/index.js create tool my-tool
-
-# Create a new resource module (with URI)
 node dist/index.js create resource my-resource --uri my://resource
-
-# Create a new prompt module
 node dist/index.js create prompt my-prompt
 ```
 
-### Verified behavior
+### Generated Paths
 
-The scaffold creator was re-tested during this doc rewrite on **2026-02-21** with all three artifact types:
+- Tool -> `src/features/tools/<name>.ts`
+- Resource -> `src/features/resources/<name>.ts`
+- Prompt -> `src/features/prompts/<name>.ts`
 
-- `create tool docs-tool`
-- `create resource docs-resource --uri docs://resource`
-- `create prompt docs-prompt`
+Full command/options reference: [docs/02-scaffold-cli.md](docs/02-scaffold-cli.md)
 
-Resulting structure produced exactly as expected:
+## Validation and Testing
 
-```text
-src/features/tools/<name>.ts
-src/features/resources/<name>.ts
-src/features/prompts/<name>.ts
-```
-
-## Project Structure
-
-```text
-src/
-  index.ts
-  core/
-    module-loader.ts
-    server-metadata.ts
-  server/
-    create-server.ts
-    run-stdio.ts
-  features/
-    tools/
-      index.ts
-      echo.ts
-      sum-numbers.ts
-    resources/
-      index.ts
-      starter-checklist.ts
-      starter-lesson.ts
-    prompts/
-      index.ts
-      scaffold-plan.ts
-scripts/
-  smoke-stdio.mjs
-  vendor-sdk-v2.mjs
-docs/
-  01-overview-and-v2.md
-  02-scaffold-cli.md
-  03-validation-and-workflow.md
-```
-
-## Validation Commands
+### Built-in Validation
 
 ```bash
 npm run typecheck
@@ -145,11 +109,11 @@ npm run smoke:stdio
 npm run pipeline
 ```
 
-`smoke:stdio` performs a real protocol handshake (`initialize`, `notifications/initialized`, list calls).
+`smoke:stdio` verifies protocol initialization and primitive listing (`tools`, `resources`, `prompts`).
 
-## mcp-cli Verification
+### mcp-cli Example
 
-Example `mcp_servers.json` (project root):
+Create a local `mcp_servers.json`:
 
 ```json
 {
@@ -162,7 +126,7 @@ Example `mcp_servers.json` (project root):
 }
 ```
 
-Run verification:
+Run checks:
 
 ```bash
 MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json info starter
@@ -171,14 +135,34 @@ MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json call starter echo '{"text":"hello"}'
 MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json call starter sum_numbers '{"numbers":[1,2,3]}'
 ```
 
-After modifying code, always use `MCP_NO_DAEMON=1` to avoid stale daemon cache.
+Detailed test workflow: [docs/03-validation-and-workflow.md](docs/03-validation-and-workflow.md)
 
-## Documentation Index
+## Documentation
 
-- `docs/01-overview-and-v2.md`
-- `docs/02-scaffold-cli.md`
-- `docs/03-validation-and-workflow.md`
-- `CHANGELOG.md`
+Start here: [docs/README.md](docs/README.md)
+
+- Architecture and v2 rationale: [docs/01-overview-and-v2.md](docs/01-overview-and-v2.md)
+- Scaffold CLI reference: [docs/02-scaffold-cli.md](docs/02-scaffold-cli.md)
+- Validation and release workflow: [docs/03-validation-and-workflow.md](docs/03-validation-and-workflow.md)
+
+## Repository Layout
+
+```text
+src/
+  index.ts
+  cli/
+  core/
+  server/
+  features/
+scripts/
+  smoke-stdio.mjs
+  vendor-sdk-v2.mjs
+docs/
+  README.md
+  01-overview-and-v2.md
+  02-scaffold-cli.md
+  03-validation-and-workflow.md
+```
 
 ## License
 

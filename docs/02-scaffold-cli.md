@@ -1,38 +1,44 @@
 # Scaffold Creator CLI
 
-## Purpose
+## Goal
 
-The scaffold creator CLI generates starter module files under `src/features/*` so you can add capabilities without repeating boilerplate manually.
+Generate starter modules for tools, resources, and prompts with consistent structure and low friction.
 
-## Command Format
+## Command
 
 ```bash
 node dist/index.js create <tool|resource|prompt> <name> [options]
 ```
 
-Options:
+## Options
 
-- `--uri <value>`: set resource URI (resource scaffolds only)
-- `--project <path>`: target project root
-- `--force`: overwrite existing file
+- `--uri <value>`: resource URI value/template (resource scaffolds only)
+- `--project <path>`: write into another project root
+- `--force`: overwrite an existing generated file
 
 ## Examples
 
 ```bash
 node dist/index.js create tool invoice-parser
 node dist/index.js create resource policy-doc --uri policy://doc
-node dist/index.js create prompt code-review-coach
+node dist/index.js create prompt review-coach
 ```
 
-## Generated Paths
+## Generated Files
 
 - tool -> `src/features/tools/<name>.ts`
 - resource -> `src/features/resources/<name>.ts`
 - prompt -> `src/features/prompts/<name>.ts`
 
-## What to edit after generation
+## Post-Generation Checklist
 
-1. Update `description` text.
-2. Replace placeholder schema fields with real input/args.
-3. Replace placeholder output with real business logic.
+1. Replace placeholder descriptions.
+2. Replace placeholder schemas with domain-specific schemas.
+3. Implement real logic and error handling.
 4. Run `npm run pipeline`.
+
+## Notes on Naming
+
+- names are normalized to kebab-case
+- file name and registered primitive name are aligned
+- this avoids mismatches during list/call/read/get operations
