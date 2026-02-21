@@ -8,6 +8,7 @@
 - Added `docs/README.md` as the documentation entrypoint.
 - Rewrote `README.md` with table of contents and clearer sections for scope, SDK context, CLI usage, and validation.
 - Standardized `docs/01`, `docs/02`, and `docs/03` formatting and content boundaries.
+- Updated repository metadata references to the renamed upstream repository path.
 
 ## 2.0.0 - 2026-02-21
 

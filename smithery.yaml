@@ -1,7 +1,7 @@
 id: mcp-examples/mcp-stdio-v2-learning-starter
 name: MCP STDIO v2 Learning Starter
 description: MCP TypeScript SDK v2 (pre-release) stdio starter with built-in scaffolding CLI
-repository: https://github.com/yigitkonur/example-mcp-server-stdio
+repository: https://github.com/yigitkonur/example-mcp-stdio
 license: MIT
 
 startCommand:
