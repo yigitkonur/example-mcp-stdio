@@ -1,14 +1,14 @@
 version: '3.8'
 
 services:
-  mcp-stdio-v2-starter:
+  example-mcp-stdio:
     build:
       context: .
       dockerfile: Dockerfile
-    image: mcp/mcp-stdio-v2-learning-starter:latest
+    image: mcp/example-mcp-stdio:latest
     stdin_open: true
     tty: true
-    container_name: mcp_stdio_v2_starter
+    container_name: example_mcp_stdio
     restart: unless-stopped
     environment:
       - NODE_ENV=production

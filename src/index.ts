@@ -16,8 +16,8 @@ function printHelp(): void {
   console.error(`${SERVER_METADATA.name} v${SERVER_METADATA.version}`);
   console.error('');
   console.error('Usage:');
-  console.error('  mcp-stdio-v2-starter serve');
-  console.error('  mcp-stdio-v2-starter create <tool|resource|prompt> <name> [options]');
+  console.error('  example-mcp-stdio serve');
+  console.error('  example-mcp-stdio create <tool|resource|prompt> <name> [options]');
   console.error('');
   console.error('Options:');
   console.error('  --uri <value>      Resource URI template (resource scaffolds only)');

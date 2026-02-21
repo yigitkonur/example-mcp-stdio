@@ -1,5 +1,5 @@
 export const SERVER_METADATA = {
-  name: 'mcp-stdio-v2-learning-starter',
+  name: 'example-mcp-stdio',
   version: '2.0.0',
   description:
     'Learning-first MCP v2 stdio starter with built-in CLI scaffolding for tools, resources, and prompts.',

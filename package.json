@@ -1,11 +1,11 @@
 {
-  "name": "mcp-stdio-v2-learning-starter",
+  "name": "example-mcp-stdio",
   "version": "2.0.0",
   "type": "module",
   "description": "Learning-first MCP v2 stdio starter with a built-in scaffolding CLI",
   "main": "./dist/index.js",
   "bin": {
-    "mcp-stdio-v2-starter": "./dist/index.js"
+    "example-mcp-stdio": "./dist/index.js"
   },
   "scripts": {
     "dev": "tsx src/index.ts serve",

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Rename: example-mcp-server-stdio → example-mcp-stdio
+
+- Renamed `package.json` `name` from `mcp-stdio-v2-learning-starter` to `example-mcp-stdio`.
+- Renamed `package.json` `bin` key from `mcp-stdio-v2-starter` to `example-mcp-stdio`.
+- Updated `smithery.yaml` `id` from `mcp-examples/mcp-stdio-v2-learning-starter` to `yigitkonur/example-mcp-stdio` and `name` to `Example MCP STDIO`.
+- Updated `src/core/server-metadata.ts` server `name` from `mcp-stdio-v2-learning-starter` to `example-mcp-stdio`.
+- Updated `src/index.ts` CLI help text binary references from `mcp-stdio-v2-starter` to `example-mcp-stdio`.
+- Updated `docker-compose.yml` service name, image, and container name to `example-mcp-stdio`/`example_mcp_stdio`.
+
 ### Documentation Rebuild For v2 Starter
 
 - Reorganized all docs for professional structure and cross-link navigation.

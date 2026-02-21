@@ -1,4 +1,4 @@
-# MCP STDIO v2 Learning Starter
+# example-mcp-stdio
 
 A production-ready, learning-focused starter for building **MCP servers over STDIO** with the **TypeScript SDK v2 primitives**.
 
