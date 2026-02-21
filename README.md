@@ -1,137 +1,185 @@
-reference MCP server over STDIO transport. uses a calculator theme to demonstrate every major SDK feature — tools, resources, prompts, streaming progress, input elicitation, autocompletion — in a single well-commented codebase. designed to be spawned as a child process by any MCP host (Claude Desktop, Cursor, VS Code, etc.).
+# MCP STDIO v2 Learning Starter
+
+## Changelog (Latest First)
+
+### 2026-02-21: Major Rewrite For Upcoming TypeScript SDK v2
+
+- Full migration from v1-style implementation to MCP SDK v2 primitives.
+- New stdio-first starter architecture (tools/resources/prompts split by feature modules).
+- New built-in scaffold creator CLI (`serve`, `create tool`, `create resource`, `create prompt`).
+- New end-to-end stdio JSON-RPC smoke test.
+- New vendored SDK update workflow for reproducible pre-release installs.
+
+Full details: `CHANGELOG.md`
+
+## What This Project Is
+
+This repository is a **learning-first boilerplate** for building MCP servers with:
+
+- **TypeScript SDK v2 primitives**
+- **STDIO transport only**
+- **modular feature structure** that scales
+- **scaffold CLI** to generate starter modules quickly
+
+## MCP SDK v2 Status (Important)
+
+As of **February 21, 2026**, the official TypeScript SDK `main` branch is v2 pre-release (pre-alpha).
+
+Official references:
+
+- SDK repository: <https://github.com/modelcontextprotocol/typescript-sdk>
+- Server guide: <https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/server.md>
+- FAQ (v2 notes, SSE removal): <https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/faq.md>
+
+Practical implications:
+
+- v2 APIs may still evolve before stable release.
+- Server-side SSE transport is not part of v2 server package direction.
+- Node 20+, ESM, and Zod v4 are required for this starter.
+
+## Dependency Strategy Used Here
+
+Because v2 publishing/distribution is still in-progress, this project uses a vendored package tarball for reproducibility:
+
+- `vendor/modelcontextprotocol-server-2.0.0-alpha.0.tgz`
+
+Refresh vendor snapshot:
 
 ```bash
-npx -y calculator-stdio-server
+npm run vendor:sdk:update
 ```
 
-[![node](https://img.shields.io/badge/node-20+-93450a.svg?style=flat-square)](https://nodejs.org/)
-[![MCP SDK](https://img.shields.io/badge/MCP_SDK-1.0+-93450a.svg?style=flat-square)](https://modelcontextprotocol.io/)
-[![license](https://img.shields.io/badge/license-MIT-grey.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-
-> also available as: [stateful HTTP](https://github.com/yigitkonur/example-mcp-server-streamable-http) | [stateless HTTP](https://github.com/yigitkonur/example-mcp-server-streamable-http-stateless) | [SSE](https://github.com/yigitkonur/example-mcp-server-sse)
-
----
-
-## what it covers
-
-this isn't meant to be a useful calculator. it's a reference for building MCP servers. every pattern the SDK supports is implemented here with inline comments explaining why.
-
-- **8 tools** — basic arithmetic, batch operations, factorials/logs/combinations, progress streaming, interactive elicitation, formula lookup, assistant stubs, maintenance mode simulation
-- **4 resources** — static JSON (`calculator://constants`, `formulas://library`), dynamic URI templates with autocompletion (`calculator://history/{id}`), live stats (`calculator://stats`)
-- **3 prompts** — all with `completable()` argument autocompletion: explain a calculation, generate practice problems, tutoring session
-- **streaming progress** — `notifications/progress` at configurable intervals
-- **input elicitation** — `server.elicitInput()` for interactive follow-up when a problem is ambiguous (e.g. "area of rectangle" with no dimensions)
-- **structured output** — tools return both `content` (text) and `structuredContent` (typed Zod schemas)
-- **error handling** — all errors are `McpError` instances with proper JSON-RPC error codes, no raw exceptions leak to transport
-
-## install
+## Quick Start
 
 ```bash
-# from npm
-npx -y calculator-stdio-server
-
-# from source
 git clone https://github.com/yigitkonur/example-mcp-server-stdio.git
 cd example-mcp-server-stdio
-npm ci && npm run build
-node dist/server.js
+npm ci
+npm run pipeline
 ```
 
-### docker
+Run server:
 
 ```bash
-docker compose up
+npm run dev
+# or
+npm run build && npm start
 ```
 
-builds a two-stage image: compiles TypeScript in the builder stage, copies only `dist/` and production deps to the runner. runs as non-root `node` user. `stdin_open` and `tty` are set in compose for STDIO transport.
+## Scaffold Creator CLI
 
-### dev
+Main entrypoint: `src/index.ts`
+
+### Commands
 
 ```bash
-npm run dev          # runs TypeScript directly via tsx, no build step
-npm run inspector    # launches MCP Inspector UI connected to source
+# Start stdio MCP server
+node dist/index.js serve
+
+# Create a new tool module
+node dist/index.js create tool my-tool
+
+# Create a new resource module (with URI)
+node dist/index.js create resource my-resource --uri my://resource
+
+# Create a new prompt module
+node dist/index.js create prompt my-prompt
 ```
 
-## how STDIO transport works
+### Verified behavior
 
-the server reads JSON-RPC 2.0 messages from `stdin` and writes responses to `stdout`. all logging goes to `stderr` — writing anything else to `stdout` would corrupt the protocol. the parent process (your MCP host) spawns this as a child process and communicates over the pipe.
+The scaffold creator was re-tested during this doc rewrite on **2026-02-21** with all three artifact types:
 
+- `create tool docs-tool`
+- `create resource docs-resource --uri docs://resource`
+- `create prompt docs-prompt`
+
+Resulting structure produced exactly as expected:
+
+```text
+src/features/tools/<name>.ts
+src/features/resources/<name>.ts
+src/features/prompts/<name>.ts
 ```
-MCP host (Claude Desktop, Cursor, etc.)
-    │
-    ├── stdin  → JSON-RPC requests  → server
-    └── stdout ← JSON-RPC responses ← server
-                 stderr → logs (never touches stdout)
-```
 
-state is entirely in-process memory. history capped at 50 entries (circular buffer). everything resets when the process exits — intentional for STDIO's process-isolation model.
+## Project Structure
 
-## tools
-
-| tool | what it demonstrates |
-|:---|:---|
-| `calculate` | basic arithmetic with optional streaming progress notifications |
-| `batch_calculate` | array input (up to 100), per-item error isolation, discriminated union output |
-| `advanced_calculate` | factorial, log (natural + base-n), C(n,k), P(n,k) with conditional required params |
-| `demo_progress` | 5 progress notifications at 500ms intervals, no input params |
-| `solve_math_problem` | detects ambiguous problems, uses `elicitInput()` to request missing dimensions |
-| `explain_formula` | simple informational tool pattern |
-| `calculator_assistant` | context-aware help with optional context interpolation |
-| `maintenance_mode` | simulated tool lifecycle management (enable/disable pattern) |
-
-## resources
-
-| URI | type | notes |
-|:---|:---|:---|
-| `calculator://constants` | static | six math constants (pi, e, phi, sqrt2, ln2, ln10) as JSON |
-| `calculator://history/{calculationId}` | dynamic | URI template with list handler, ID autocompletion, per-entry lookup |
-| `calculator://stats` | dynamic | live uptime and request count |
-| `formulas://library` | static | five formulas (quadratic, pythagorean, circle area, compound interest, distance) |
-
-## prompts
-
-| prompt | arguments | autocompletion |
-|:---|:---|:---|
-| `explain-calculation` | `expression`, `level?` | level: elementary/intermediate/advanced |
-| `generate-problems` | `difficulty?`, `count?`, `operations?` | difficulty + operations filtered by prefix |
-| `calculator-tutor` | `topic`, `level?` | topic: 6 suggestions, level: 3 options |
-
-all prompt arguments use the `completable()` wrapper from the SDK, which provides async prefix-filtered suggestions to the client.
-
-## configuration
-
-| env var | default | description |
-|:---|:---|:---|
-| `SAMPLE_TOOL_NAME` | — | if set, registers a dynamic tool with this name (demonstrates runtime-configurable tools) |
-| `--debug` | off | pass as CLI arg to enable debug-level logging to stderr |
-| `--help` | — | prints usage to stderr and exits |
-
-## project structure
-
-```
+```text
 src/
-  server.ts    — all server logic: tools, resources, prompts, main()
-  types.ts     — constants, static data, logger, HistoryEntry interface
+  index.ts
+  core/
+    module-loader.ts
+    server-metadata.ts
+  server/
+    create-server.ts
+    run-stdio.ts
+  features/
+    tools/
+      index.ts
+      echo.ts
+      sum-numbers.ts
+    resources/
+      index.ts
+      starter-checklist.ts
+      starter-lesson.ts
+    prompts/
+      index.ts
+      scaffold-plan.ts
+scripts/
+  smoke-stdio.mjs
+  vendor-sdk-v2.mjs
+docs/
+  01-overview-and-v2.md
+  02-scaffold-cli.md
+  03-validation-and-workflow.md
 ```
 
-two files. `types.ts` is data-only (no business logic, no Zod schemas). `server.ts` is everything else. the `createCalculatorServer()` factory is exported so tests can instantiate without auto-starting.
-
-## quality gate
+## Validation Commands
 
 ```bash
-npm run pipeline     # clean → typecheck → lint:fix → lint:ci → format → build
-npm run smoke:stdio  # spawns server, waits 900ms, sends SIGINT, checks exit code
-npm run all          # pipeline + smoke
+npm run typecheck
+npm run lint:ci
+npm run format:check
+npm run build
+npm run smoke:stdio
+npm run pipeline
 ```
 
-CI runs on every push to `main` and all PRs: typecheck, lint (zero warnings), format check, build.
+`smoke:stdio` performs a real protocol handshake (`initialize`, `notifications/initialized`, list calls).
 
-## error handling
+## mcp-cli Verification
 
-follows the MCP protocol contract: all errors thrown from handlers are `McpError` instances with proper `ErrorCode` values. the SDK serializes these as JSON-RPC error objects. business logic errors (division by zero, missing params) use `InvalidParams`. infrastructure errors use `InternalError`. raw JS exceptions never reach the transport.
+Example `mcp_servers.json` (project root):
 
-process-level: `SIGINT`/`SIGTERM` trigger graceful shutdown (exit 0). uncaught exceptions and unhandled rejections log to stderr and exit 70 (`EX_SOFTWARE` from BSD `sysexits.h`).
+```json
+{
+  "mcpServers": {
+    "starter": {
+      "command": "node",
+      "args": ["./dist/index.js"]
+    }
+  }
+}
+```
 
-## license
+Run verification:
+
+```bash
+MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json info starter
+MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json info starter echo
+MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json call starter echo '{"text":"hello"}'
+MCP_NO_DAEMON=1 mcp-cli -c mcp_servers.json call starter sum_numbers '{"numbers":[1,2,3]}'
+```
+
+After modifying code, always use `MCP_NO_DAEMON=1` to avoid stale daemon cache.
+
+## Documentation Index
+
+- `docs/01-overview-and-v2.md`
+- `docs/02-scaffold-cli.md`
+- `docs/03-validation-and-workflow.md`
+- `CHANGELOG.md`
+
+## License
 
 MIT
