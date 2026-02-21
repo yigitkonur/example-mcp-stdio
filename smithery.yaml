@@ -1,17 +1,15 @@
-# smithery.yaml
-id: mcp-examples/calculator-learning-demo-stdio
-name: Calculator Learning Demo (STDIO)
-description: Educational MCP server demonstrating advanced calculator features with STDIO transport
-repository: https://github.com/anthropics/mcp-server-examples
+id: mcp-examples/mcp-stdio-v2-learning-starter
+name: MCP STDIO v2 Learning Starter
+description: MCP TypeScript SDK v2 (pre-release) stdio starter with built-in scaffolding CLI
+repository: https://github.com/yigitkonur/example-mcp-server-stdio
 license: MIT
 
 startCommand:
   type: stdio
   command: node
-  args: ['dist/server.js']
+  args: ['dist/index.js', 'serve']
   cwd: ./
 
-# Optional: per-session configuration (JSON Schema)
 configSchema:
   type: object
   properties:
@@ -19,9 +17,5 @@ configSchema:
       type: string
       enum: ['debug', 'info', 'warn', 'error']
       default: 'info'
-      description: 'Logging level for the calculator server'
-    ENABLE_DEBUG:
-      type: boolean
-      default: false
-      description: 'Enable debug mode with verbose logging'
+      description: Logging level used by your MCP host/client
   required: []
